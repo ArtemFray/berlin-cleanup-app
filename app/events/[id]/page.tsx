@@ -139,7 +139,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const isFull = event.maxParticipants && event._count.registrations >= event.maxParticipants;
+  event.maxParticipants ? event._count.registrations >= event.maxParticipants : false
 
   return (
     <div className="min-h-screen bg-gray-50">
