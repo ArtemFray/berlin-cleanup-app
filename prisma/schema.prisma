@@ -1,0 +1,152 @@
+// Prisma Schema for Berlin Cleanup App
+// This defines the database structure
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  VOLUNTEER
+  ADMIN
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  EVENT_SPECIFIC
+  GENERAL_ANNOUNCEMENT
+  EVENT_REMINDER
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(VOLUNTEER)
+  profilePicture String?
+  points        Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  registrations EventRegistration[]
+  notifications UserNotification[]
+  createdEvents Event[]             @relation("EventCreator")
+  pointHistory  PointHistory[]
+
+  @@index([email])
+  @@index([points])
+}
+
+model Event {
+  id              String      @id @default(cuid())
+  title           String
+  description     String      @db.Text
+  location        String
+  latitude        Float
+  longitude       Float
+  startDateTime   DateTime
+  endDateTime     DateTime
+  status          EventStatus @default(UPCOMING)
+  maxParticipants Int?
+  meetingPoint    String
+  eventResults    String?     @db.Text
+  photos          String[]    // Array of photo URLs
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  creatorId     String
+  creator       User                @relation("EventCreator", fields: [creatorId], references: [id])
+  registrations EventRegistration[]
+  notifications Notification[]
+
+  @@index([startDateTime])
+  @@index([status])
+  @@index([latitude, longitude])
+}
+
+model EventRegistration {
+  id           String   @id @default(cuid())
+  attended     Boolean  @default(false)
+  hoursWorked  Float?
+  trashCollected Int?   // in kg
+  registeredAt DateTime @default(now())
+
+  // Relations
+  userId       String
+  eventId      String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model PointHistory {
+  id          String   @id @default(cuid())
+  points      Int
+  reason      String   // e.g., "Registered for event", "Attended event", "Collected 10kg trash"
+  eventId     String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String           @db.Text
+  type      NotificationType
+  createdAt DateTime         @default(now())
+
+  // Relations
+  eventId        String?
+  event          Event?              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userNotifications UserNotification[]
+
+  @@index([createdAt])
+}
+
+model UserNotification {
+  id        String   @id @default(cuid())
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId         String
+  notificationId String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationId])
+  @@index([userId])
+}
+
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
