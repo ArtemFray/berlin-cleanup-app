@@ -51,11 +51,17 @@ export default function Header() {
   };
 
   const handleLogout = () => {
+    // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+
+    // Clear cookie
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+
     setUser(null);
-    router.push('/');
-    router.refresh();
+
+    // Redirect to home with full page reload
+    window.location.href = '/';
   };
 
   return (

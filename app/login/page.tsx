@@ -48,19 +48,13 @@ export default function LoginPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        console.log('[LoginPage] Saved to localStorage, redirecting to:', data.user.role === 'ADMIN' ? '/admin' : '/');
+        // Also set token as cookie for middleware
+        document.cookie = `token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
 
-        // Redirect based on role
-        if (data.user.role === 'ADMIN') {
-          router.push('/admin');
-        } else {
-          router.push('/');
-        }
+        console.log('[LoginPage] Saved to localStorage and cookie, redirecting to:', data.user.role === 'ADMIN' ? '/admin' : '/');
 
-        // Force reload after a short delay to ensure redirect happens
-        setTimeout(() => {
-          window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/';
-        }, 500);
+        // Force redirect with full page reload to ensure middleware sees the cookie
+        window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/';
       } else {
         console.log('[LoginPage] Login failed:', data.error);
         setError(data.error || 'Authentication failed');
