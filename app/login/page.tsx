@@ -44,17 +44,17 @@ export default function LoginPage() {
         console.log('[LoginPage] Token:', data.token ? 'present' : 'MISSING');
         console.log('[LoginPage] User:', data.user);
 
-        // Save token to localStorage
+        // Save token to localStorage (for client-side API calls)
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        // Also set token as cookie for middleware
-        document.cookie = `token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+        console.log('[LoginPage] Saved to localStorage, redirecting to:', data.user.role === 'ADMIN' ? '/admin' : '/');
 
-        console.log('[LoginPage] Saved to localStorage and cookie, redirecting to:', data.user.role === 'ADMIN' ? '/admin' : '/');
-
-        // Force redirect with full page reload to ensure middleware sees the cookie
-        window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/';
+        // Cookie is set server-side, just redirect
+        // Use a small delay to ensure cookie is set
+        setTimeout(() => {
+          window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/';
+        }, 100);
       } else {
         console.log('[LoginPage] Login failed:', data.error);
         setError(data.error || 'Authentication failed');

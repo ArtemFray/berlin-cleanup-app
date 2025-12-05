@@ -50,13 +50,17 @@ export default function Header() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
 
-    // Clear cookie
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+    // Call logout API to clear httpOnly cookie
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
 
     setUser(null);
 

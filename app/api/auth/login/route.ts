@@ -62,10 +62,24 @@ export async function POST(request: NextRequest) {
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    // Create response with cookie
+    const response = NextResponse.json({
       token,
       user: userWithoutPassword,
     });
+
+    // Set token as httpOnly cookie (7 days)
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/',
+    });
+
+    console.log('[Login] Set cookie with token');
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
