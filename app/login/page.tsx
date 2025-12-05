@@ -20,8 +20,12 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
+    console.log('[LoginPage] Submitting form with email:', formData.email);
+
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      console.log('[LoginPage] Calling endpoint:', endpoint);
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -30,12 +34,21 @@ export default function LoginPage() {
         body: JSON.stringify(formData),
       });
 
+      console.log('[LoginPage] Response status:', response.status);
+
       const data = await response.json();
+      console.log('[LoginPage] Response data:', data);
 
       if (response.ok) {
+        console.log('[LoginPage] Login successful!');
+        console.log('[LoginPage] Token:', data.token ? 'present' : 'MISSING');
+        console.log('[LoginPage] User:', data.user);
+
         // Save token to localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+
+        console.log('[LoginPage] Saved to localStorage, redirecting to:', data.user.role === 'ADMIN' ? '/admin' : '/');
 
         // Redirect based on role
         if (data.user.role === 'ADMIN') {
@@ -43,12 +56,18 @@ export default function LoginPage() {
         } else {
           router.push('/');
         }
+
+        // Force reload after a short delay to ensure redirect happens
+        setTimeout(() => {
+          window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/';
+        }, 500);
       } else {
+        console.log('[LoginPage] Login failed:', data.error);
         setError(data.error || 'Authentication failed');
       }
     } catch (err) {
+      console.error('[LoginPage] Auth error:', err);
       setError('An error occurred. Please try again.');
-      console.error('Auth error:', err);
     } finally {
       setLoading(false);
     }
