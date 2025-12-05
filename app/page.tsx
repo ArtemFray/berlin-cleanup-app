@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
+import Header from '@/components/Header';
 
 // Dynamically import map component (client-side only)
 const EventMap = dynamic(() => import('@/components/EventMap'), {
@@ -49,28 +50,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-primary-600 text-white shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Berlin Cleanup</h1>
-              <p className="text-primary-100 mt-1">Volunteer Street Cleaning Events</p>
-            </div>
-            <div className="flex gap-4">
-              <Link href="/leaderboard" className="btn bg-white text-primary-600 hover:bg-primary-50">
-                Leaderboard
-              </Link>
-              <Link href="/profile" className="btn bg-primary-700 hover:bg-primary-800">
-                Profile
-              </Link>
-              <Link href="/admin" className="btn bg-primary-700 hover:bg-primary-800">
-                Admin
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
