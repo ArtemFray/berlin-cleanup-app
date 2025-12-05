@@ -228,6 +228,20 @@ ADMIN_NAME=Admin
 
 ---
 
+## Deployment Fix (ESLint Conflict)
+
+**Issue**: Vercel build was failing with:
+```
+npm error ERESOLVE could not resolve
+npm error peer eslint@">=9.0.0" from eslint-config-next@16.0.7
+```
+
+**Fix Applied**:
+- Changed `eslint-config-next` from `^16.0.7` to `14.2.5` (matches Next.js version)
+- Locked `next` to `14.2.5` (no caret)
+
+This is now fixed and committed.
+
 ## Next Steps
 
 1. ✅ Push the committed changes to GitHub
