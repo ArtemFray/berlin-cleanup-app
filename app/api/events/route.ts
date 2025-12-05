@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const upcoming = searchParams.get('upcoming');
 
+    console.log('[GET /api/events] Request params:', { status, upcoming });
+
     let where: any = {};
 
     if (status) {
@@ -21,6 +23,8 @@ export async function GET(request: NextRequest) {
       };
       where.status = 'UPCOMING';
     }
+
+    console.log('[GET /api/events] Query where:', where);
 
     const events = await prisma.event.findMany({
       where,
@@ -43,11 +47,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    console.log('[GET /api/events] Found events:', events.length);
+
     return NextResponse.json({ events });
   } catch (error) {
-    console.error('Get events error:', error);
+    console.error('[GET /api/events] Error:', error);
+    console.error('[GET /api/events] Error details:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: 'Failed to get events' },
+      { error: 'Failed to get events', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

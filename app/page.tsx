@@ -40,9 +40,18 @@ export default function HomePage() {
     try {
       const response = await fetch('/api/events?upcoming=true');
       const data = await response.json();
-      setEvents(data.events);
+
+      console.log('[HomePage] Events API response:', response.status, data);
+
+      if (response.ok && data.events) {
+        setEvents(data.events);
+      } else {
+        console.error('[HomePage] Failed to fetch events:', data.error || 'Unknown error');
+        setEvents([]);
+      }
     } catch (error) {
-      console.error('Failed to fetch events:', error);
+      console.error('[HomePage] Failed to fetch events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
